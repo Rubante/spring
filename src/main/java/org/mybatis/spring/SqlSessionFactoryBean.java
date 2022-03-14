@@ -71,11 +71,17 @@ import org.springframework.util.ClassUtils;
 /**
  * {@code FactoryBean} that creates a MyBatis {@code SqlSessionFactory}. This is the usual way to set up a shared
  * MyBatis {@code SqlSessionFactory} in a Spring application context; the SqlSessionFactory can then be passed to
- * MyBatis-based DAOs via dependency injection.
+ * MyBatis-based DAOs via dependency injection. <br />
+ *
+ * {@code FactoryBean}可以创建一个MyBatis的 {@code SqlSessionFactory}。 这是一种在spring应用程序中常见的创建共享
+ * MyBatis {@code SqlSessionFactory}的方法。创建的这个SqlSessionFactory可以通过依赖注入传递到基于MyBatis的DAO中去。 <br/>
  *
  * Either {@code DataSourceTransactionManager} or {@code JtaTransactionManager} can be used for transaction demarcation
  * in combination with a {@code SqlSessionFactory}. JTA should be used for transactions which span multiple databases or
- * when container managed transactions (CMT) are being used.
+ * when container managed transactions (CMT) are being used.<br />
+ *
+ * 无论是{@code DataSourceTransactionManager}还是{@code JtaTransactionManager}都可以与{@code SqlSessionFactory}一起用于声明式事务。
+ *
  *
  * @author Putthiphong Boonphong
  * @author Hunter Presnall
@@ -91,7 +97,13 @@ public class SqlSessionFactoryBean
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBean.class);
 
+  /**
+   * 正则模式的资源解决器
+   */
   private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
+  /**
+   * 带有缓存的类原信息读取器工厂
+   */
   private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
   private Resource configLocation;
@@ -492,11 +504,15 @@ public class SqlSessionFactoryBean
   }
 
   /**
-   * Build a {@code SqlSessionFactory} instance.
+   * Build a {@code SqlSessionFactory} instance. <br />
+   * 创建一个{@code SqlSessionFactory}的实例。
    *
    * The default implementation uses the standard MyBatis {@code XMLConfigBuilder} API to build a
    * {@code SqlSessionFactory} instance based on a Reader. Since 1.3.0, it can be specified a {@link Configuration}
-   * instance directly(without config file).
+   * instance directly(without config file). <br />
+   *
+   *  默认实现是用一个标准的MyBatis {@code XMLConfigBuilder} API去构建一个基于配置文件读取器的{@code SqlSessionFactory}实例。
+   *  从1.3.0开始，可以不用配置文件直接指定一个{@link Configuration}的实例。
    *
    * @return SqlSessionFactory
    * @throws Exception
@@ -507,20 +523,25 @@ public class SqlSessionFactoryBean
     final Configuration targetConfiguration;
 
     XMLConfigBuilder xmlConfigBuilder = null;
+    // 指定了configuration，则用指定的配置实例
     if (this.configuration != null) {
       targetConfiguration = this.configuration;
+      // 目标实例若没有配置变量则使用configurationProperties，否则将configurationProperties添加到配置变量中
       if (targetConfiguration.getVariables() == null) {
         targetConfiguration.setVariables(this.configurationProperties);
       } else if (this.configurationProperties != null) {
         targetConfiguration.getVariables().putAll(this.configurationProperties);
       }
-    } else if (this.configLocation != null) {
+    } else if (this.configLocation != null) { // 指定配置文件的路径
+      // 创建一个xml配置文件建造者
       xmlConfigBuilder = new XMLConfigBuilder(this.configLocation.getInputStream(), null, this.configurationProperties);
+      // 从配置文件建造者获取配置实例
       targetConfiguration = xmlConfigBuilder.getConfiguration();
     } else {
       LOGGER.debug(
           () -> "Property 'configuration' or 'configLocation' not specified, using default MyBatis Configuration");
       targetConfiguration = new Configuration();
+      // 如果存在configurationProperties，则设置到setVariables中
       Optional.ofNullable(this.configurationProperties).ifPresent(targetConfiguration::setVariables);
     }
 
@@ -528,12 +549,14 @@ public class SqlSessionFactoryBean
     Optional.ofNullable(this.objectWrapperFactory).ifPresent(targetConfiguration::setObjectWrapperFactory);
     Optional.ofNullable(this.vfs).ifPresent(targetConfiguration::setVfsImpl);
 
+    // 别名路径扫描，registerAlias
     if (hasLength(this.typeAliasesPackage)) {
       scanClasses(this.typeAliasesPackage, this.typeAliasesSuperType).stream()
           .filter(clazz -> !clazz.isAnonymousClass()).filter(clazz -> !clazz.isInterface())
           .filter(clazz -> !clazz.isMemberClass()).forEach(targetConfiguration.getTypeAliasRegistry()::registerAlias);
     }
 
+    // 额外指定了类型别名
     if (!isEmpty(this.typeAliases)) {
       Stream.of(this.typeAliases).forEach(typeAlias -> {
         targetConfiguration.getTypeAliasRegistry().registerAlias(typeAlias);
@@ -601,6 +624,7 @@ public class SqlSessionFactoryBean
       if (this.mapperLocations.length == 0) {
         LOGGER.warn(() -> "Property 'mapperLocations' was specified but matching resources are not found.");
       } else {
+        // mapper文件解析
         for (Resource mapperLocation : this.mapperLocations) {
           if (mapperLocation == null) {
             continue;
@@ -663,17 +687,28 @@ public class SqlSessionFactoryBean
     }
   }
 
+  /**
+   * 扫描特定目录(带正则模式)下的类
+   *
+   * @param packagePatterns
+   * @param assignableType  特定类或接口，可以为空
+   * @return
+   * @throws IOException
+   */
   private Set<Class<?>> scanClasses(String packagePatterns, Class<?> assignableType) throws IOException {
     Set<Class<?>> classes = new HashSet<>();
     String[] packagePatternArray = tokenizeToStringArray(packagePatterns,
         ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
     for (String packagePattern : packagePatternArray) {
+      // classpath下所有的class文件
       Resource[] resources = RESOURCE_PATTERN_RESOLVER.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
           + ClassUtils.convertClassNameToResourcePath(packagePattern) + "/**/*.class");
       for (Resource resource : resources) {
         try {
+          // 类元数据， 获取可以获取类的注解元数据。getAnnotationMetadata
           ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(resource).getClassMetadata();
           Class<?> clazz = Resources.classForName(classMetadata.getClassName());
+          // assignableType未指定类型或指定类的子类，将被纳入扫描
           if (assignableType == null || assignableType.isAssignableFrom(clazz)) {
             classes.add(clazz);
           }

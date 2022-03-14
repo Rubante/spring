@@ -20,7 +20,8 @@ import java.util.function.Supplier;
 import org.apache.ibatis.logging.Log;
 
 /**
- * Wrapper of {@link Log}, allow log with lambda expressions.
+ * Wrapper of {@link Log}, allow log with lambda expressions. <br />
+ * {@link Log}的包装类，允许使用lambda表达式记录日志
  *
  * @author Putthiphong Boonphong
  */
@@ -44,12 +45,22 @@ public class Logger {
     log.warn(s.get());
   }
 
+  /**
+   * debug级别，添加判定开关，用lambda表达式封装日志信息
+   *
+   * @param s
+   */
   public void debug(Supplier<String> s) {
     if (log.isDebugEnabled()) {
       log.debug(s.get());
     }
   }
 
+  /**
+   * trace级别，添加判定开关，用lambda表达式封装日志信息
+   *
+   * @param s
+   */
   public void trace(Supplier<String> s) {
     if (log.isTraceEnabled()) {
       log.trace(s.get());

@@ -18,8 +18,8 @@ package org.mybatis.logging;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
- * LoggerFactory is a wrapper around {@link LogFactory} to support {@link Logger}.
- *
+ * LoggerFactory is a wrapper around {@link LogFactory} to support {@link Logger}. <br />
+ * LoggerFactory是{@link LogFactory}的包装器，用于支持 {@link Logger}.
  * @author Putthiphong Boonphong
  */
 public class LoggerFactory {

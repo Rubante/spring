@@ -31,7 +31,10 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Use this annotation to register MyBatis mapper interfaces when using Java Config. It performs when same work as
- * {@link MapperScannerConfigurer} via {@link MapperScannerRegistrar}.
+ * {@link MapperScannerConfigurer} via {@link MapperScannerRegistrar}. <br />
+ * 当使用Java配置时，使用这个注解来注册mybatis mapper的接口。它执行的工作如同{@link MapperScannerConfigurer}通过
+ * {@link MapperScannerRegistrar}执行的一样。
+ *
  *
  * <p>
  * Either {@link #basePackageClasses} or {@link #basePackages} (or its alias {@link #value}) may be specified to define
@@ -101,7 +104,8 @@ public @interface MapperScan {
    * package of each class specified will be scanned.
    * <p>
    * Consider creating a special no-op marker class or interface in each package that serves no purpose other than being
-   * referenced by this attribute.
+   * referenced by this attribute. <br />
+   * 考虑在某一个包中创建一个特殊的无任何操作的标记接口或类，它只被用于此处没有其他用途
    *
    * @return classes that indicate base package for scanning mapper interface
    */

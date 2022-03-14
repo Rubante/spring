@@ -15,5 +15,14 @@
  */
 /**
  * Contains core classes to build the MyBatis integration with Spring3.X.
+ * <br />
+ * 一般项目中很少有这个文件
+ * <ul>
+ *  1、为标注在包上Annotation提供便利；ElementType.PACKAGE
+ * <p>
+ * 2、声明友好类和包常量；
+ * <p>
+ * 3、提供包的整体注释说明。
+ * </ul>
  */
 package org.mybatis.spring;

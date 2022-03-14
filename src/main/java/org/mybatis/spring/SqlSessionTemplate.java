@@ -42,20 +42,28 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 
 /**
- * Thread safe, Spring managed, {@code SqlSession} that works with Spring transaction management to ensure that that the
+ * Thread safe, Spring managed, {@code SqlSession} that works with Spring transaction management to ensure that the
  * actual SqlSession used is the one associated with the current Spring transaction. In addition, it manages the session
  * life-cycle, including closing, committing or rolling back the session as necessary based on the Spring transaction
  * configuration.
  * <p>
+ * spring管理的线程安全的， {@code SqlSession}同spring事务管理器确保在当前的spring事务中实际使用的同一个SqlSession。另外，它基于spring
+ * 事务配置管理session的声明周期，包括关闭，提交或回滚
+ * <p>
  * The template needs a SqlSessionFactory to create SqlSessions, passed as a constructor argument. It also can be
  * constructed indicating the executor type to be used, if not, the default executor type, defined in the session
  * factory will be used.
+ * <p>
+ * 此模板需要一个SqlSessionFactory去创建SqlSessions，通过一个有参构造函数来传递SqlSessionFactory。它也可以通过指定执行器的类来创建并使用，
+ * 如果没有指定执行器类型，将使用默认定义的执行器器类型，simple executor。
  * <p>
  * This template converts MyBatis PersistenceExceptions into unchecked DataAccessExceptions, using, by default, a
  * {@code MyBatisExceptionTranslator}.
  * <p>
  * Because SqlSessionTemplate is thread safe, a single instance can be shared by all DAOs; there should also be a small
  * memory savings by doing this. This pattern can be used in Spring configuration files as follows:
+ * <p>
+ * 因为SqlSessionTemplate是线程安全的，一个单实例就可以被所有DAO共享；
  *
  * <pre class="code">
  * {@code
